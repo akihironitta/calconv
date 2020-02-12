@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+from math import ceil
+import argparse
+
+
+DESCRIPTION = "hogehoge"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
+    parser.add_argument("-i", "--interactive", action="store_true")
+    parser.add_argument("--input_size", nargs="*", type=int, help="MNIST (28, 28): 28 28, CIFAR10 (3, 32, 32): 3 32 32")
+    parser.add_argument("--kernel_size", nargs="*", type=int, help="(3, 3): 3 3")     
+    parser.add_argument("--stride", nargs="*", type=int, help="(3, 3): 3 3")
+    parser.add_argument("--padding", nargs="*", type=int, help="(3, 3): 3 3")
+    parser.add_argument("--dilation", nargs="*", type=int, help="(3, 3): 3 3")
+    return parser.parse_args()
+
+
+def calc_size(input_size, kernel_size, stride=1, padding=0, dilation=1):
+    """
+    Args:
+        input_size (tuple): Size of the input image.
+        kernel_size (int or tuple): Size of the convolving kernel
+        stride (int or tuple, optional): Stride of the convolution. Default: 1
+        padding (int or tuple, optional): Zero-padding added to both sides of
+            the input. Default: 0
+        dilation (int or tuple, optional): Spacing between kernel
+            elements. Default: 1
+    """
+    stride = to_2d(kernel_size)
+    stride = to_2d(stride)
+    stride = to_2d(padding)
+    stride = to_2d(dilation)
+    
+    if len(input_size) == 2:
+        h_in = input_size[0]
+        w_in = input_size[1]
+    elif len(input_size) == 3:
+        # c_in = input_size[0]
+        h_in = input_size[1]
+        w_in = input_size[2]
+    else:
+        raise ValueError("`input_size` should contain only 2 or 3 elements.")
+    h_out = ceil((h_in + 2*padding[0] - dilation[0]*(kernel_size[0] - 1) - 1) / stride[0]) + 1
+    w_out = ceil((w_in + 2*padding[1] - dilation[1]*(kernel_size[1] - 1) - 1) / stride[1]) + 1
+    
+    return (h_out, w_out)
+    
+
+def to_2d(parameter):
+    """
+    Convert single int into tuple of two integers.
+    e.g.)
+    input: 3
+    output: (3, 3)
+    """
+    if type(parameter) is int:
+        parameter = (parameter, parameter)
+    elif len(parameter) == 1:
+        parameter = (parameter[0], parameter[0])
+    return parameter
+
+
+def input_line():
+    input_size = tuple(map(int, input("input_size = ").split()))
+    kernel_size = tuple(map(int, input("kernel_size = ").split()))
+    stride = tuple(map(int, input("stride = ").split()))
+    padding = tuple(map(int, input("padding = ").split()))
+    dilation = tuple(map(int, input("dilation = ").split()))
+    print(input_size, kernel_size, stride, padding, dilation)
+    return input_size, kernel_size, stride, padding, dilation
+
+
+def loop_input_line():
+    while True:
+        tmp = input_line()
+        print(tmp)
+        print(calc_size(*tmp))
+
+
+def main():
+    args = parse_args()
+    if args.interactive:
+        loop_input_line()
+    else:
+        result = calc_size(args.input_size, args.kernel_size,
+                           args.stride, args.padding, args.dilation)
+        print(*result)
+        
+def test():
+    input_size = (3, 28, 28)
+    kernel_size = (3, 3)
+    stride = (1, 1)
+    padding = (0, 0)
+    dilation = (1, 1)
+    print(calc_size(input_size, kernel_size, stride, padding, dilation))
+    
+    
+if __name__ == "__main__":
+    main()

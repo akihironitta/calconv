@@ -1,0 +1,12 @@
+* NAME
+
+  =calconv= - A simple calculator for size of neural networks.
+
+* DESCRIPTION
+
+  =calconv= calculates output size of single or multiple convolution layers.
+  While =torchsummary= gets information about size of each layer by passing a random tensor through the network
+  and thus need to actually allocate memory, =calconv= only uses parameters of convolution layers and works even under very limited resources.
+
+  =calconv= is still the best choice on multiple GPUs
+  when you have to deal with very high resolution (VHR) imagery like satellite imagery.
